@@ -1,7 +1,9 @@
-#include <stdio.h>
+#include "types.h"
+#include "stat.h"
+#include "user.h"
 
-int main()
+int main(void)
 {
-    printf("hello world\n");
-    return 0;
+    printf(1,"hello world\n");
+    exit();
 }
