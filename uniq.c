@@ -18,39 +18,7 @@ void uniq(int fd, char *name, int occurance,int print_dup,int ignore_case) {
     this = thisLine;
     prep = prepre;
     
-    while((n = read(fd, buf, sizeof(buf))) > 0){
-        for(i=0; i<n; i++){
-            if(buf[i] == '\n'){  
-                if(l != 0){
-                    memset(prepre, 0, MAX);
-                    strcpy(prepre,prevLine);
-                    
-                    if(ignore_case){ 
-                        if(ignore_case_cmp(this,prev) != 0){ 
-                            outputLine(prevLine,1);
-                            count_dup = 1;
-                        }else{ //  dup
-                            count_dup++;
-                        }
-                    }else{
-                        if(strcmp(thisLine,prevLine) != 0){
-                            outputLine(prevLine,1);
-                            count_dup = 1;
-                        }else{
-                            count_dup++;
-                        }
-                    }
-                }else{
-                    strcpy(prevLine,thisLine);
-                }
-                l++;
-                c = 0;
-            }else{
-                thisLine[c] = buf[i];
-                c++;
-            }
-        }
-        int ignore_case_cmp(const char* this,const char* prev){
+    int ignore_case_cmp(const char* this,const char* prev){
                 const char* s1 = prev;
                 const char* s2 = this;
                 char c1, c2;
@@ -73,21 +41,57 @@ void uniq(int fd, char *name, int occurance,int print_dup,int ignore_case) {
                 return 1;
     }
     void outputLine(char temp[],int f){
-        if(occurance){ 
-            printf(1,"%d %s\n",count_dup,temp);
-        }else{
-            if(print_dup){
-                if(count_dup>1){
+            if(occurance){ 
+                printf(1,"%d %s\n",count_dup,temp);
+            } else {
+                if(print_dup){
+                    if(count_dup>1){
+                        printf(1,"%s\n",temp);
+                    }
+                } else 
                     printf(1,"%s\n",temp);
-                }
-            }else
-                printf(1,"%s\n",temp);
-        }
-        if(f){
-            strcpy(temp,thisLine);
-            memset(thisLine, 0, MAX);
-        }
+            }
+            if(f){
+                strcpy(temp,thisLine);
+                memset(thisLine, 0, MAX);
+            }
     }
+
+    while((n = read(fd, buf, sizeof(buf))) > 0){
+        
+        for(i=0; i<n; i++){
+            if(buf[i] == '\n'){  
+                if(l != 0){
+                    memset(prepre, 0, MAX);
+                    strcpy(prepre,prevLine);
+                    
+                    if(ignore_case){ 
+                        if(ignore_case_cmp(this,prev) != 0){ 
+                            outputLine(prevLine,1);
+                            count_dup = 1;
+                        } else { 
+                            count_dup++;
+                        }
+                    } else {
+                        if(strcmp(thisLine,prevLine) != 0){
+                            outputLine(prevLine,1);
+                            count_dup = 1;
+                        } else {
+                            count_dup++;
+                        }
+                    }
+                } else {
+                    strcpy(prevLine,thisLine);
+                }
+                l++;
+                c = 0;
+            } else {
+                thisLine[c] = buf[i];
+                c++;
+            }
+        }
+        
+    
     
     }
     if(ignore_case){
@@ -101,12 +105,12 @@ void uniq(int fd, char *name, int occurance,int print_dup,int ignore_case) {
                 count_dup = 2;
                 if(strcmp(thisLine,"") != 0)
                     outputLine(prevLine,0);
-            }else{
+            } else {
                 outputLine(prepre,0);
             }
         }
     } else {
-        if(strcmp(thisLine,prevLine) != 0){ //thisline != prevLIne
+        if(strcmp(thisLine,prevLine) != 0){ 
             outputLine(prevLine,0);
             count_dup = 1;
             if(strcmp(thisLine,"") != 0)
@@ -116,7 +120,7 @@ void uniq(int fd, char *name, int occurance,int print_dup,int ignore_case) {
                 count_dup = 2;
                 if(strcmp(thisLine,"") != 0)
                     outputLine(prevLine,0);
-            }else{
+            } else {
                 outputLine(prepre,0);
             }
         }
@@ -159,7 +163,7 @@ int main(int argc, char *argv[]) {
         if(dup == 1 && occur == 1){
             printf(1, "uniq: -d -c cannot be execute in the same time %s\n", argv[i]);
             exit();
-        }else{
+        } else {
             uniq(fd, name, occur,dup,ig);
             close(fd);
             exit();
