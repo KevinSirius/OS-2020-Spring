@@ -1,126 +1,169 @@
-char buf[5120000];
-char *args;
-int uniq(int fd, char *name)
-{
-	int final=0,k,p,q,index=0,m=0,l=0,b,n,i,count=0,count1 = 0; char pilot[10000];
-        char *output[10000];
-	int repeat[1000];
-	
- while((n = read(fd, buf, sizeof(buf))) > 0)
+#include "types.h"
+#include "stat.h"
+#include "user.h"
+#define MAX 900
 
-        {        for(b=0; b<n; b++)
-		 {
-                     if(buf[b] == '\n')
-                          l++;
-                 }
-                for(i=0;buf[i]!='\n';i++)
-                {
-                        count++;
-                         pilot[i]=buf[i];
-                }
-           
-    	        pilot[i]='\0';
-		repeat[0]=1;
-                output[0]=(char*)malloc((count+1)*sizeof(char*));
-                for(i=0;i<count+1;i++)
-                {
-                output[index][i]=pilot[i];
-                }
-		output[index][i]='\0';
-                k=i;
-        while(final<l-1)
-	{
-		final++;
-        	count1=0;
-		for(i=k;buf[i]!='\n';i++)
-        	{
-			count1++;
-        		pilot[m++]=buf[i];
-        	}
-		pilot[m]='\0';
-		k=k+count1+1;
-		m=0;
-        	if(strcmp(output[index],pilot)!=0)
-		{
-			index = index + 1;
-			output[index]=(char*)malloc((count1+1)*sizeof(char*));
-			for(p=0;p<count1;p++)
-			{
-                		output[index][p]=pilot[p];
-			}
-			output[index][p]='\0';
-			repeat[index]=1;
-        	}
-		else
-		{
-			repeat[index]=repeat[index]+1;
+char buf[MAX];
 
-		}
-	}
-	}
-        if(strcmp(args,"-c")==0 || strcmp(args,"-C")==0 )
-	{
-		for(q=0;q<index+1;q++)
-                { 
-                        printf(1,"%d %s \n",repeat[q],output[q]);
+void uniq(int fd, char *name, int occurance,int print_dup,int ignore_case) {
+    int i, n,j,r,f;
+    int l, w, c;
+    l = w = c = j = r = f = 0;
+    char prevLine[MAX], thisLine[MAX];
+    char prepre[MAX];
+    int count_dup;
+    count_dup = 1;
+    char *prev, *this,*prep;
+    prev = prevLine;
+    this = thisLine;
+    prep = prepre;
+    
+    while((n = read(fd, buf, sizeof(buf))) > 0){
+        for(i=0; i<n; i++){
+            if(buf[i] == '\n'){  
+                if(l != 0){
+                    memset(prepre, 0, MAX);
+                    strcpy(prepre,prevLine);
+                    
+                    if(ignore_case){ 
+                        if(ignore_case_cmp(this,prev) != 0){ 
+                            outputLine(prevLine,1);
+                            count_dup = 1;
+                        }else{ //  dup
+                            count_dup++;
+                        }
+                    }else{
+                        if(strcmp(thisLine,prevLine) != 0){
+                            outputLine(prevLine,1);
+                            count_dup = 1;
+                        }else{
+                            count_dup++;
+                        }
+                    }
+                }else{
+                    strcpy(prevLine,thisLine);
                 }
-              }
-       else  if(strcmp(args,"-d")==0 || strcmp(args,"-D")==0 )
-	{
-	      for(q=0;q<index+1;q++)
-              {
-		if(repeat[q]>1)
-		{	
-              		printf(1,"%s \n",output[q]);
-		}
-	      }	
+                l++;
+                c = 0;
+            }else{
+                thisLine[c] = buf[i];
+                c++;
+            }
         }
-	else
-	{
-	     for(q=0;q<index+1;q++)
-             {
-             	 printf(1,"%s \n",output[q]);
-              }
-
-	}
-	free(output); 
-        return 0;
+        int ignore_case_cmp(const char* this,const char* prev){
+                const char* s1 = prev;
+                const char* s2 = this;
+                char c1, c2;
+                while(*s1 != '\0'){
+                        if(*s1 <= 'Z' && *s1 >= 'A'){
+                                c1 = *s1 + 32;
+                        } else {
+                                c1 = *s1;
+                        }
+                        if (*s2 <= 'Z' && *s2 >= 'A'){
+                                c2 = *s2 + 32;
+                        } else {
+                                c2 = *s2;
+                        }
+                        if ((c1-c2) != 0)  return 1;
+                        s1++;
+                        s2++;
+                }
+                if(*s2 == '\0') return 0;
+                return 1;
+    }
+    void outputLine(char temp[],int f){
+        if(occurance){ 
+            printf(1,"%d %s\n",count_dup,temp);
+        }else{
+            if(print_dup){
+                if(count_dup>1){
+                    printf(1,"%s\n",temp);
+                }
+            }else
+                printf(1,"%s\n",temp);
+        }
+        if(f){
+            strcpy(temp,thisLine);
+            memset(thisLine, 0, MAX);
+        }
+    }
+    
+    }
+    if(ignore_case){
+        if(ignore_case_cmp(this,prev) != 0){ 
+            outputLine(prevLine,0);
+            count_dup = 1;
+            if(strcmp(thisLine,"") != 0)
+                outputLine(thisLine,0);
+        } else {  
+            if(ignore_case_cmp(this,prep) != 0){
+                count_dup = 2;
+                if(strcmp(thisLine,"") != 0)
+                    outputLine(prevLine,0);
+            }else{
+                outputLine(prepre,0);
+            }
+        }
+    } else {
+        if(strcmp(thisLine,prevLine) != 0){ //thisline != prevLIne
+            outputLine(prevLine,0);
+            count_dup = 1;
+            if(strcmp(thisLine,"") != 0)
+                outputLine(thisLine,0);
+        } else { 
+            if(strcmp(thisLine,prepre) != 0){
+                count_dup = 2;
+                if(strcmp(thisLine,"") != 0)
+                    outputLine(prevLine,0);
+            }else{
+                outputLine(prepre,0);
+            }
+        }
+    }
 }
-int main(int argc, char **argv)
-{
-  int fd, r;
-  if(argc <= 1)
-  {
-    uniq(0, "");
-    exit();
-  }
-  else if(argc == 2)
-  {
-  for(r = 1; r < argc; r++)
-  {
-    if((fd = open(argv[r], 0)) < 0)
-    {
-      printf(1,"uniq: cannot open %s\n", argv[r]);
-      exit();
+
+int main(int argc, char *argv[]) {
+    int fd, i;
+    char *name;
+    int occur, dup, ig;
+    occur=dup=ig=0;
+    
+    fd = 0;
+    name = "";
+    if (argc <= 1) {
+        uniq(fd, name, occur,dup,ig);
+        exit();
     }
-    uniq(fd, argv[r]);
-    close(fd);
-  }
-  exit();
-  }
-  else
-  {
-    for(r = 2; r < argc; r++)
-  {
-    if((fd = open(argv[r], 0)) < 0)
-    {
-      printf(1,"uniq: cannot open %s\n", argv[r]);
-      exit();
+    
+    else {
+        for (i = 0; i < argc; i++) {
+            if(strcmp(argv[i],"-i") == 0){
+                ig = 1;
+            }else if(strcmp(argv[i],"-c") == 0){ 
+                occur = 1;
+            }else if(strcmp(argv[i],"-d") == 0){ 
+                dup = 1;
+            }
+            
+            if (atoi(argv[i]) == 0 && *argv[i] != '0' && *argv[i] != '-') {
+                if ((fd = open(argv[i], 0)) < 0) {
+                    printf(1, "uniq: cannot open %s\n", argv[i]);
+                    exit();
+                }
+            }
+            else {
+                argv[i]++;
+            }
+        }
+        if(dup == 1 && occur == 1){
+            printf(1, "uniq: -d -c cannot be execute in the same time %s\n", argv[i]);
+            exit();
+        }else{
+            uniq(fd, name, occur,dup,ig);
+            close(fd);
+            exit();
+        }
+        
     }
-    args=argv[1];
-    uniq(fd, argv[r]);
-    close(fd);
-  }
-  exit();
-  }
-} 
+}
