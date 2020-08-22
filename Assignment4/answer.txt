@@ -1,0 +1,26 @@
+A
+ONly one philosopher can eat while ones on the sides are not eating.
+When the state is HUNGRY and if the two states on the sidews are NOT in EATING, they should be in HUNGRY state and waiting for available forks.
+At the moment, the philoshpher finish state EATING and put forks down, the philosophers who are in HUNGRY state can start EATING if fork is available.
+
+
+B
+1. Two threads a b
+a 13
+b 13
+a 14
+b 14
+a 15
+b 15
+a 16
+b 16
+a 17
+b 17
+a 18
+b 18
+a 19
+b 19
+
+
+2. Make the lock before 19th line is not a good solution. The statement made in 16 is the main issue; 
+The later process who try to modify the same table will overwrite the eariler process who try to do the same, so adding the lock before line 16 is the solution.

@@ -1,0 +1,9 @@
+Part 4
+
+1. Shell uses fork to run programs from the command line, duplicate current program, spawn processes in some parallel programs. Fork creates two identical processes with different process id, and one is the other's child. When using execute, it replaces the code and data in the current process with new code and data. 
+
+2. A process has three states: running, ready, blocked. OS responds to interrupts sent to the CPU and switch between the states. When process blocks for input, it changes from running to blocked. When scheduler picks another process, it changes from running to ready. When scheduler picks this process, it changes from ready to running. When input become available, it changes from blocked to ready. 
+
+3. 
+	a. Average turnaround time = (10+6+2+4+8)/5 = 6 minutes
+	b. Average turnaround time = ((10+16+18)+(22-3)+(26-3)) = 17.2 minutes

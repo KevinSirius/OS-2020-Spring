@@ -1,0 +1,8 @@
+Microkernel's user services and kernel services are impletemented under different address space unlike Monolithic Kernel.
+Microkernel is smaller in size in compensate with slower execution while being easily extendible. Single crash on a service would not affect other services as well as kernel.
+Monolithic Kernel is bigger but faster, while maintaining a less extendable form.
+
+"Everything is a file" means everything in the OS is represented by a file descriptor. All the things including files, directories, pipes are abstracted by the filesystem.
+
+A file descriptor is like an entry number to opened file. Essentially they are unsigned integer nuhmbers used by a process to identify the opened file.
+Yes. The value of 2 is possible, since the system will assign positive unsigned integers when the file is opened correctly.

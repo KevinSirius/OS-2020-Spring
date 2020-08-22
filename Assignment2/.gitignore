@@ -1,0 +1,6 @@
+guess
+hello
+*.elf
+linkedList
+*.o
+.gdb*
