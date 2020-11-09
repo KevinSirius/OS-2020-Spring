@@ -6,7 +6,7 @@ _start:
 	movb $0x00, %ah		# set video mode
 	movb $0x03, %al
 	int $0x10
-	movb $0x00, %bl		# random number not generated yet. Flag
+	# movb $0x00, %bl		# random number not generated yet. Flag
 	movb $0x0d, %cl		# game start
 	movb $0x00, %bh     # clear random number
 	jmp print_char
@@ -20,7 +20,7 @@ loops:
 	int $0x10
 	movw $prompt, %si
 	movb $0x0d, %cl		# game is not finished
-	movb $0x00, %bl		# random number not generated yet. Flag
+	# movb $0x00, %bl		# random number not generated yet. Flag
 	movb $0x00, %bh     # clear random number
 	jmp print_char
 
@@ -57,7 +57,7 @@ check:
 done:
 	testb %cl,%cl	# see if the game is completed
 	jz loops     # if yes go to loops
-	testb %bl,%bl	# see if the game was not started yet
+	testb %bh,%bh	# see if there is a random number or not
 	jz generate_rand
 	jmp get_input	# continue guess
 
@@ -77,7 +77,7 @@ generate_rand:				 # Setups the random number in %bh using the clock
 	and $0x0F, %al      
 	add $0x30, %al
 	movb %al, %bh        # Puts the remainder in bh
-	movb $0x01,%bl		# number generated flag
+	# movb $0x01,%bl		# number generated flag
 	jmp get_input
 
 prompt:
